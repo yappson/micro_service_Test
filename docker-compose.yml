@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  upload-batch:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: upload-batch
+    ports:
+      - "9191:9191"
+    networks:
+      - upload
+    depends_on:
+      - sqldb-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://sqldb-service:3306/springupload
+    volumes:
+      - upload-app-volume:/app
+
+  sqldb-service:
+    image: mysql
+    container_name: sqldb-service
+    environment:
+      MYSQL_ROOT_PASSWORD: zoom
+    ports:
+      - "3309:3306"
+    networks:
+      - upload
+    volumes:
+      - upload-db-volume:/var/lib/mysql
+      - ./:/docker-entrypoint-initdb.d
+networks:
+  upload:
+    driver: bridge
+
+volumes:
+  upload-app-volume:
+  upload-db-volume:
